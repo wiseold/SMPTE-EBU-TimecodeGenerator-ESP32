@@ -16,6 +16,7 @@
 
 */
 #include <WiFi.h>
+#include <WiFiManager.h> //by tzapu 2.0.17
 #include <ESPmDNS.h>
 #include <lwip/apps/sntp.h>
 
@@ -26,13 +27,13 @@
 // from the internal expansion connector. And this 5 vpp-ish signal goes to
 // the old red wire. The emitter of the transistor is to the ground.
 //
-#define RED_PIN     (GPIO_NUM_13)
-#define BLACK_PIN   (GPIO_NUM_12)
+#define RED_PIN     (GPIO_NUM_2)
+#define BLACK_PIN   (GPIO_NUM_0)
 
 // We've got a 680 Ohm resitor to ground on the analog clock boards (Leitch 5100 series); and none on
 // the board for the digital versions (Leitch 5212).
 //
-#define SENSE_PIN   (GPIO_NUM_14)
+#define SENSE_PIN   (GPIO_NUM_4)
 
 const char * name = "none-set";
 
@@ -41,7 +42,7 @@ const char * name = "none-set";
 #endif
 
 #ifndef NTP_DEFAULT_TZ
-#define NTP_DEFAULT_TZ "CET-1CEST,M3.5.0,M10.5.0/3"
+#define NTP_DEFAULT_TZ "AEST-10AEDT,M10.1.0,M4.1.0/3"
 #endif
 
 #ifndef WIFI_RECONNECT_RETRY_TIMEOUT
@@ -80,8 +81,18 @@ void setup() {
 
   delay(500);
   WiFi.mode(WIFI_STA);
-  WiFi.begin(WIFI_NETWORK, WIFI_PASSWD);
-
+  //WiFi.begin(WIFI_NETWORK, WIFI_PASSWD);
+  WiFiManager wm;
+ 
+  bool res;
+  res = wm.autoConnect("AutoConnectAP","password"); // password protected ap
+      if(!res) {
+  
+          Serial.println("Failed to connect");
+  
+          // ESP.restart();
+  
+      }
   ota_setup();
   web_setup();
   ntp_setup(15); // Sync every 15 minutes (NTP sync is once an hour in polling mode.
